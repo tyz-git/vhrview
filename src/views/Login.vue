@@ -16,13 +16,16 @@
 </template>
 
 <script>
+    //导入方法   --把方法导进来，才能使用
+    import {postKeyValueRequest} from "../../utils/api";
+
     export default {
         name: "Login",
         data() {
             return {
                 loginForm: {
-                    username: 'zhangsan',
-                    password: '0000'
+                    username: 'admin',
+                    password: '123'
                 },
                 checked: true,
                 rules: {
@@ -33,9 +36,15 @@
         },
         methods: {
             submit (){
+                // 表单校验通过后才执行后面的代码
                 this.$refs.loginForm.validate((valid) => {
                     if (valid) {
-                        alert('submit!');
+                        // resp:服务端响应数据
+                        postKeyValueRequest('/doLogin', this.loginForm).then(resp => {
+                            if (resp){
+                                alert(JSON.stringify(resp));
+                            }
+                        })
                     } else {
                         this.$message.error('请完善选项');
                         return false;
