@@ -16,8 +16,8 @@
 </template>
 
 <script>
-    //导入方法   --把方法导进来，才能使用
-    import {postKeyValueRequest} from "../../utils/api";
+    // //导入方法   --把方法导进来，才能使用。可以选择这种用哪个方法酒导入哪个方法。也可以把方法放到vue对象中的prototype中(main.js)。然后直接在使用的地方用当前vue对象(this)调用即可
+    // import {postKeyValueRequest} from "../../utils/api";
 
     export default {
         name: "Login",
@@ -40,9 +40,19 @@
                 this.$refs.loginForm.validate((valid) => {
                     if (valid) {
                         // resp:服务端响应数据
-                        postKeyValueRequest('/doLogin', this.loginForm).then(resp => {
+                        this.postKeyValueRequest('/doLogin', this.loginForm).then(resp => {
                             if (resp){
-                                alert(JSON.stringify(resp));
+                                //其他页面也同样需要登录后才可以访问，所以登录成功后需要保存用户信息，提供给其他页面
+                                window.sessionStorage.setItem('user', JSON.stringify(resp.object));
+                                /**
+                                 * vue提供了两种方式实现页面跳转
+                                 * 方式一(replace):浏览器中有回退键，退到上一次访问的页面。但是这种方式相当于替换了页面，所以这种方式实现页面跳转后回退键不可点击
+                                 * 方式二(push):压栈的意思，跳转页面相当于把页面压入栈中。回退键可以点击，点击后当前的页面就出栈了，页面就又会展示上一次访问的页面了
+                                 * $.xx:调用xx对象。例如:this.$router,代表通过当前vue对象获取router对象
+                                 */
+                                this.$router.replace('/home');
+                            }else {
+                                this.$message.error("登录失败,请检查您的用户名和密码");
                             }
                         })
                     } else {

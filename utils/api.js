@@ -8,8 +8,11 @@ import {Message} from "element-ui";
  * error:请求失败的回调
  * */
 axios.interceptors.response.use(success => {
-    if (success.status && success.status && success.data.status == 500){
+    if (success.status && success.status == 200 && success.data.code == 500){
         return;
+    }
+    if (success.data.msg){
+        Message.success(success.data.msg);
     }
     return success.data;
 },error => {
@@ -43,11 +46,42 @@ export const postKeyValueRequest=(url, params) => {
             for (let i in data){
                 ret += encodeURIComponent(i) + '=' + encodeURIComponent(data[i]) + '&';
             }
-            console.log(ret);
             return ret;
         }],
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
         }
+    });
+}
+
+//封装普通post方法
+export const postRequest=(url,params) => {
+    return axios({
+        method: 'post',
+        url: `${base}${url}`,
+        data: params
+    });
+}
+//封装普通put方法
+export const putRequest=(url,params) => {
+    return axios({
+        method: 'put',
+        url: `${base}${url}`,
+        data: params
+    });
+}
+//封装普通get方法
+export const getRequest=(url) => {
+    return axios({
+        method: 'get',
+        url: `${base}${url}`,
+    });
+}
+//封装普通delete方法
+export const deleteRequest=(url,params) => {
+    return axios({
+        method: 'delete',
+        url: `${base}${url}`,
+        data: params
     });
 }
