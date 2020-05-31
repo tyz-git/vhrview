@@ -6,8 +6,8 @@
             <el-form-item prop="username">
                 <el-input type="text" v-model="loginForm.username" auto-complete="off" placeholder="请输入用户名"></el-input>
             </el-form-item>
-            <el-form-item prop="password">
-                <el-input type="text" v-model="loginForm.password" auto-complete="off" placeholder="请输入密码"></el-input>
+            <el-form-item prop="password">                                                                      <!-- 这里如果是普通input标签就不需要加native,因为这是饿了么UI所以需要加上native-->
+                <el-input type="text" v-model="loginForm.password" auto-complete="off" placeholder="请输入密码" @keyup.enter.native="submit"></el-input>
             </el-form-item>
             <el-checkbox v-model="checked" class="loginRemember"></el-checkbox>
             <el-button type="primary" style="width: 100%" @click="submit">登录</el-button>
