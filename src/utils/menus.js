@@ -49,7 +49,7 @@ export const formatRoutes=(routes) => {
             meta: meta,
             children: children,
             component(resolve){
-                // require(要跳转的模板路径,/)
+                // require(要跳转的模板路径,/) 告诉vue你要跳转的模板的在哪里
                 if (component.startsWith('Home')){
                     require(['../views/' + component + '.vue'], resolve);
                 }else if (component.startsWith("Emp")){
