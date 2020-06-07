@@ -30,9 +30,17 @@ router.beforeEach((to, from, next) => {
   if (to.path == '/'){
     next();
   }else {
-    //如果跳转其他页面就去从后台加载菜单数据
-    initMenu(router, store);
-    next();
+    //如果用户没有登录就请求接口，先跳转到登录页让用户登录
+    if (window.sessionStorage.getItem("user")){
+        //如果跳转其他页面就去从后台加载菜单数据
+        initMenu(router, store);
+        next();
+    }else {
+        //如果用户在没登录的情况下想访问其他接口，那么把用户想访问的接口保存下来，用户登录后直接请求刚才用户想请求的接口(为了用户体验更好)
+        if (to.path){
+            next("/?redirect="+to.path);
+        }
+    }
   }
 })
 

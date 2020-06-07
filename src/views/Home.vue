@@ -43,7 +43,7 @@
                     <div class="breadCrumbs" v-if="this.$router.currentRoute.path == '/home'">
                         欢迎来到微管理系统
                     </div>
-                    <router-view/>
+                    <router-view style="margin-top: 20px;"/>
                 </el-main>
             </el-container>
         </el-container>

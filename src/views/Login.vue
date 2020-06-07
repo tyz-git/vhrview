@@ -50,7 +50,10 @@
                                  * 方式二(push):压栈的意思，跳转页面相当于把页面压入栈中。回退键可以点击，点击后当前的页面就出栈了，页面就又会展示上一次访问的页面了
                                  * $.xx:调用xx对象。例如:this.$router,代表通过当前vue对象获取router对象
                                  */
-                                this.$router.replace('/home');
+                                //这里获取一下用户没登录的情况下是否请求了其他接口
+                                let to = this.$route.query.redirect;
+                                //如果有就直接跳转，没有直接进home页
+                                this.$router.replace((to || to != undefined)?to:'/home');
                             }else {
                                 this.$message.error("登录失败,请检查您的用户名和密码");
                             }

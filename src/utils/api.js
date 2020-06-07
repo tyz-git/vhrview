@@ -9,10 +9,13 @@ import {Message} from "element-ui";
  * */
 axios.interceptors.response.use(success => {
     if (success.status && success.status == 200 && success.data.code == 500){
+        Message.error(success.data.msg);
         return;
     }
-    if (success.data.msg){
-        Message.success(success.data.msg);
+    if (!success.data.isAlert) {
+        if (success.data.msg){
+            Message.success(success.data.msg);
+        }
     }
     return success.data;
 },error => {
@@ -78,10 +81,9 @@ export const getRequest=(url) => {
     });
 }
 //封装普通delete方法
-export const deleteRequest=(url,params) => {
+export const deleteRequest=(url) => {
     return axios({
         method: 'delete',
         url: `${base}${url}`,
-        data: params
     });
 }
