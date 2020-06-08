@@ -24,7 +24,7 @@
                     :data="jobLevelList"
                     stripe
                     @selection-change="handleSelectionChange"
-                    style="width: 100%;">
+                    style="width: 100%;height: 100%;">
                 <el-table-column
                         type="selection"
                         width="70">
@@ -61,12 +61,39 @@
                 </el-table-column>
             </el-table>
         </div>
+        <div>
+            <!-- :visible.sync='x' x是一个变量，来控制这个dialog是否显示 -->
+            <el-dialog
+                    title="修改职称"
+                    :visible.sync="isShow"
+                    width="30%">
+                <div>
+                    <el-tag>职称</el-tag>
+                    <el-input v-model="dialogJl.name" size="small" placeholder="请输入职称" style="width: 300px;margin-left: 10px;" @keyup.enter.native="updateJobLevel"></el-input>
+                </div>
+                <div>
+                    <el-tag>等级</el-tag>
+                    <el-select v-model="dialogJl.titleLevel" placeholder="请选择等级" size="small" style="width: 300px;margin-left: 10px;margin-top: 10px;">
+                        <el-option
+                                v-for="item in levels"
+                                :key="item"
+                                :label="item"
+                                :value="item">
+                        </el-option>
+                    </el-select>
+                </div>
+                <span slot="footer" class="dialog-footer">
+                    <el-button type="primary" size="small" @click="updateJobLevel">确 定</el-button>
+                    <el-button size="small" @click="isShow = false">取 消</el-button>
+                </span>
+            </el-dialog>
+        </div>
     </div>
 </template>
 
 <script>
 
-    import {deleteRequest, getRequest, postRequest} from "../utils/api";
+    import {deleteRequest, getRequest, postRequest, putRequest} from "../utils/api";
 
     export default {
         name: "jobTitleManagement",
@@ -74,6 +101,14 @@
             this.initJobLevel();
         },
         methods: {
+            updateJobLevel() {
+                putRequest("/system/basic/jobLevel/", this.dialogJl).then(resp=> {
+                    if (resp) {
+                        this.isShow = false;
+                        this.initJobLevel();
+                    }
+                })
+            },
             deleteJobLevels() {
                 this.$confirm('此操作将永久删除【'+ this.multipleSelection.length +'】条数据, 是否继续?', '提示', {
                     confirmButtonText: '确定',
@@ -131,7 +166,8 @@
                 });
             },
             handleEdit(index, data) {
-
+                this.isShow = true;
+                Object.assign(this.dialogJl, data);
             },
             initJobLevel() {
               getRequest("/system/basic/jobLevel/").then(resp=> {
@@ -148,6 +184,11 @@
                   name: ''
               },
               jobLevelList: [],
+              isShow: false,
+              dialogJl: {
+                  name: '',
+                  titleLevel: ''
+              },
               multipleSelection: [],
               levels:[
                   '正高级',
