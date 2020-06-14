@@ -48,6 +48,13 @@
                         prop="createDate"
                         label="创建时间">
                 </el-table-column>
+                <el-table-column
+                        label="是否启用">
+                    <template slot-scope="scope"> <!-- scope.row:获取当前行数据 -->
+                        <el-tag type="success" v-if="scope.row.enabled" style="width: 58px;text-align: center;">启用</el-tag>
+                        <el-tag type="danger" v-else>未启用</el-tag>
+                    </template>
+                </el-table-column>
                 <el-table-column label="操作">
                     <template slot-scope="scope">
                         <el-button
@@ -68,11 +75,11 @@
                     :visible.sync="isShow"
                     width="30%">
                 <div>
-                    <el-tag>职称</el-tag>
+                    <el-tag style="width:70px;">职称</el-tag>
                     <el-input v-model="dialogJl.name" size="small" placeholder="请输入职称" style="width: 300px;margin-left: 10px;" @keyup.enter.native="updateJobLevel"></el-input>
                 </div>
                 <div>
-                    <el-tag>等级</el-tag>
+                    <el-tag style="width:70px;">等级</el-tag>
                     <el-select v-model="dialogJl.titleLevel" placeholder="请选择等级" size="small" style="width: 300px;margin-left: 10px;margin-top: 10px;">
                         <el-option
                                 v-for="item in levels"
@@ -81,6 +88,15 @@
                                 :value="item">
                         </el-option>
                     </el-select>
+                </div>
+                <div style="margin-top: 10px;">
+                    <el-tag style="margin-right: 13px;">是否启用</el-tag>
+                    <el-switch
+                            style="margin-right: 165px;"
+                            v-model="dialogJl.enabled"
+                            active-text="启用"
+                            inactive-text="未启用">
+                    </el-switch>
                 </div>
                 <span slot="footer" class="dialog-footer">
                     <el-button type="primary" size="small" @click="updateJobLevel">确 定</el-button>
@@ -187,7 +203,8 @@
               isShow: false,
               dialogJl: {
                   name: '',
-                  titleLevel: ''
+                  titleLevel: '',
+                  enabled: false
               },
               multipleSelection: [],
               levels:[

@@ -1,11 +1,11 @@
 <template>
     <div>
-        <el-tabs type="border-card" style="height: 585px;">
-            <el-tab-pane label="部门管理"><deptManagement></deptManagement></el-tab-pane>
-            <el-tab-pane label="职位管理"><positionManagement></positionManagement></el-tab-pane>
-            <el-tab-pane label="职称管理"><jobTitleManagement></jobTitleManagement></el-tab-pane>
-            <el-tab-pane label="奖惩规则"><rewardPunishmentManagement></rewardPunishmentManagement></el-tab-pane>
-            <el-tab-pane label="权限组"><authority></authority></el-tab-pane>
+        <el-tabs type="border-card" style="height: 585px;" v-model="activeName">
+            <el-tab-pane label="部门管理" name="deptManagement"><deptManagement></deptManagement></el-tab-pane>
+            <el-tab-pane label="职位管理" name="positionManagement"><positionManagement></positionManagement></el-tab-pane>
+            <el-tab-pane label="职称管理" name="jobTitleManagement"><jobTitleManagement></jobTitleManagement></el-tab-pane>
+            <el-tab-pane label="奖惩规则" name="rewardPunishmentManagement"><rewardPunishmentManagement></rewardPunishmentManagement></el-tab-pane>
+            <el-tab-pane label="权限组" name="authority"><authority></authority></el-tab-pane>
         </el-tabs>
     </div>
 </template>
@@ -21,7 +21,7 @@
         name: "SysBasic",
         data() {
             return {
-
+                activeName: 'deptManagement'
             }
         },
         components: {

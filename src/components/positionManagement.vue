@@ -35,6 +35,13 @@
                         prop="createDate"
                         label="创建时间">
                 </el-table-column>
+                <el-table-column
+                        label="是否启用">
+                    <template slot-scope="scope">
+                        <el-tag type="success" v-if="scope.row.enabled" style="width: 58px;text-align: center;">启用</el-tag>
+                        <el-tag type="danger" v-else>未启用</el-tag>
+                    </template>
+                </el-table-column>
                 <el-table-column label="操作">
                     <!-- 下面两个方法参数作用一致，拿handleEdit(scope.$index,scope.row)举例。scope.$index:当前操作的是第几行数据,scope.row:获取当前行的数据 -->
                     <template slot-scope="scope">
@@ -54,8 +61,21 @@
                     title="修改职位"
                     :visible.sync="isShow"
                     width="30%">
-                <el-tag>职位</el-tag>
-                <el-input v-model="updatePos.name" @keyup.enter.native="update" class="updateInputClass" size="small" placeholder="请输入职位"></el-input>
+                <div>
+                    <div style="margin-left: 23px;">
+                        <el-tag style="width: 70px;">职位</el-tag>
+                        <el-input v-model="updatePos.name" @keyup.enter.native="update" class="updateInputClass" size="small" placeholder="请输入职位"></el-input>
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <el-tag>是否启用</el-tag>
+                        <el-switch
+                                style="margin-right: 145px;margin-left: 10px;"
+                                v-model="updatePos.enabled"
+                                active-text="启用"
+                                inactive-text="未启用">
+                        </el-switch>
+                    </div>
+                </div>
                 <span slot="footer" class="dialog-footer">
                 <el-button type="primary" @click="update" size="small">确 定</el-button>
                 <el-button @click="closeDialog" size="small">取 消</el-button>
@@ -163,7 +183,8 @@
                 multipleSelection: [],
                 isShow: false,
                 updatePos: {
-                    name: ''
+                    name: '',
+                    enabled: false
                 }
             }
         }
