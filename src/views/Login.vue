@@ -1,7 +1,7 @@
 <template>
     <div>
 <!--        ref为表单的名字(和根据id查找元素是一样的，但是ref是vue的特性，这么写也比较方便)-->
-        <el-form :rules="rules" ref="loginForm" :model="loginForm" class="loginContainer">
+        <el-form  v-loading="loading" :rules="rules" ref="loginForm" :model="loginForm" class="loginContainer">
             <h3 class="loginTitle">系统登录</h3>
             <el-form-item prop="username">
                 <el-input type="text" v-model="loginForm.username" auto-complete="off" placeholder="请输入用户名"></el-input>
@@ -23,6 +23,8 @@
         name: "Login",
         data() {
             return {
+                //控制加载效果的变量
+                loading: false,
                 loginForm: {
                     username: 'admin',
                     password: '123'
@@ -39,8 +41,10 @@
                 // 表单校验通过后才执行后面的代码
                 this.$refs.loginForm.validate((valid) => {
                     if (valid) {
+                        this.loading = true;
                         // resp:服务端响应数据
                         this.postKeyValueRequest('/doLogin', this.loginForm).then(resp => {
+                            this.loading = false;
                             if (resp){
                                 //其他页面也同样需要登录后才可以访问，所以登录成功后需要保存用户信息，提供给其他页面
                                 window.sessionStorage.setItem('user', JSON.stringify(resp.object));
