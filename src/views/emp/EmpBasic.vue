@@ -7,8 +7,18 @@
                 <el-button type="primary" icon="el-icon-sort">高级搜索</el-button>
             </div>
             <div>
-                <el-button type="success" icon="el-icon-upload2">导入数据</el-button>
-                <el-button type="success" icon="el-icon-download">导出数据</el-button>
+                <el-upload
+                        class="upload-demo"
+                        action="/emp/basic/uploadImport"
+                        style="display:inline-flex;margin-right: 8px;"
+                        :show-file-list="false"
+                        :before-upload="beforeUpload"
+                        :on-success="onSuccess"
+                        :disabled="isAbled"
+                        multiple>
+                    <el-button  type="success" :icon="importIcon">{{importData}}</el-button>
+                </el-upload>
+                <el-button type="success" icon="el-icon-download" @click="exportData">导出数据</el-button>
                 <el-button type="success" icon="el-icon-plus" @click="showDialog">新增员工</el-button>
             </div>
         </div>
@@ -145,8 +155,8 @@
                         label="操作">
                     <template slot-scope="scope">
                         <el-button size="mini" type="info">高级资料</el-button>
-                        <el-button size="mini" type="warning">编辑</el-button>
-                        <el-button size="mini" type="danger">删除</el-button>
+                        <el-button size="mini" type="warning" @click="showEditDialog(scope.row)">编辑</el-button>
+                        <el-button size="mini" type="danger" @click="deleteEmp(scope.row)">删除</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -163,10 +173,10 @@
         <!-- 添加员工的对话框 -->
         <div>
             <el-dialog
-                    title="新增员工"
+                    :title="showTitle"
                     width="80%"
                     :visible.sync="isShow">
-                <el-form :model="addEmployeeForm" status-icon :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
+                <el-form :model="addEmployeeForm" status-icon :rules="rules"  ref="ruleForm" label-width="100px" class="demo-ruleForm">
                     <el-row>
                         <el-col :span="6">
                             <div class="grid-content bg-purple-dark">
@@ -419,7 +429,7 @@
                         </el-col>
                         <el-col :span="6" style="margin-left: 50px;">
                             <div class="grid-content bg-purple-dark">
-                                <el-form-item label="婚姻状况：" prop="beginContract">
+                                <el-form-item label="婚姻状况：" prop="wedlock">
                                     <el-radio-group v-model="addEmployeeForm.wedlock">
                                         <el-radio label="已婚">已婚</el-radio>
                                         <el-radio label="未婚">未婚</el-radio>
@@ -431,7 +441,7 @@
                     </el-row>
                 </el-form>
                 <span slot="footer" class="dialog-footer">
-                    <el-button type="primary" @click="">确 定</el-button>
+                    <el-button type="primary" @click="addEmployee">确 定</el-button>
                     <el-button @click="closeDialog">取 消</el-button>
                 </span>
             </el-dialog>
@@ -440,12 +450,16 @@
 </template>
 
 <script>
-    import {getRequest} from "../../utils/api";
+    import {deleteRequest, getRequest, postRequest, putRequest} from "../../utils/api";
 
     export default {
         name: "EmpBasic",
         data(){
             return {
+                isAbled: false,
+                importIcon: 'el-icon-upload2',
+                importData: '导入数据',
+                showTitle: '',
                 //显示在树中模拟下拉框的div中
                 tempTreeName: '',
                 defaultProps: {
@@ -454,9 +468,46 @@
                 },
                 deps: [],
                 showDepsPopover: false,
-                rules:[],
+                rules:{
+                    name: [{required: true, message: '请输入员工姓名', trigger: 'blur'}],
+                    gender:[{required: true, message: '请选择性别', trigger: 'blur'}],
+                    birthday:[{required: true, message: '请选择出生日期', trigger: 'blur'}],
+                    idCard:[
+                        {required: true, message: '请输入身份证号', trigger: 'blur'},
+                        {pattern: /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/, message: '身份证格式不正确', trigger: 'blur'}
+                    ],
+                    wedlock:[{required: true, message: '请选择婚姻状况', trigger: 'blur'}],
+                    nationId:[{required: true, message: '请选择民族', trigger: 'blur'}],
+                    nativePlace:[{required: true, message: '请输入籍贯', trigger: 'blur'}],
+                    politicId:[{required: true, message: '请选择政治面貌', trigger: 'blur'}],
+                    email:[
+                        {required: true, message: '请输入邮箱地址', trigger: 'blur'},
+                        {type: 'email', message: '邮箱格式不正确', trigger: 'blur'}
+                        ],
+                    phone:[
+                        {required: true, message: '请输入手机号', trigger: 'blur'},
+                        {pattern: /^1(3([0-35-9]\d|4[1-8])|4[14-9]\d|5([0125689]\d|7[1-79])|66\d|7[2-35-8]\d|8\d{2}|9[89]\d)\d{7}$/, message: '手机号格式不正确', trigger: 'blur'}
+                        ],
+                    address:[{required: true, message: '请输入居住地址', trigger: 'blur'}],
+                    departmentId:[{required: true, message: '请选择部门', trigger: 'blur'}],
+                    jobLevelId:[{required: true, message: '请选择职称', trigger: 'blur'}],
+                    posId:[{required: true, message: '请选择职位', trigger: 'blur'}],
+                    engageForm:[{required: true, message: '请选择聘用形式', trigger: 'blur'}],
+                    tiptopDegree:[{required: true, message: '请选择学历', trigger: 'blur'}],
+                    specialty:[{required: true, message: '请输入专业名称', trigger: 'blur'}],
+                    school:[{required: true, message: '请输入毕业院校', trigger: 'blur'}],
+                    beginDate:[{required: true, message: '请选择入职时间', trigger: 'blur'}],
+                    workState:[{required: true, message: '请选择在职状态', trigger: 'blur'}],
+                    workID:[{required: true, message: '请输入员工工号', trigger: 'blur'}],
+                    contractTerm:[{required: true, message: '请输入合同期限', trigger: 'blur'}],
+                    conversionTime:[{required: true, message: '请选择转正日期', trigger: 'blur'}],
+                    notWorkDate:[{required: true, message: '请选择离职日期', trigger: 'blur'}],
+                    beginContract:[{required: true, message: '请选择合同起始日期', trigger: 'blur'}],
+                    endContract:[{required: true, message: '请选择合同终止日期', trigger: 'blur'}],
+                    workAge:[{required: true, message: '请输入工龄', trigger: 'blur'}]
+                },
                 //学历
-                educations: ['本科','专科','博士','硕士','研究生','高中','小学','其他'],
+                educations: ['本科','大专','博士','硕士','高中','初中','小学','其他'],
                 //职称
                 joblevels: [],
                 //职位
@@ -477,32 +528,32 @@
                 //dialog是否展示
                 isShow: false,
                 addEmployeeForm:{
-                    name: "嘎嘎",
-                    gender: "男",
-                    birthday: "1989-12-31",
-                    idCard: "610122199001011256",
-                    wedlock: "已婚",
-                    nationId: 1,
-                    nativePlace: "陕西",
-                    politicId: 13,
-                    email: "laowang@qq.com",
-                    phone: "18565558897",
-                    address: "深圳市南山区",
-                    departmentId: 5,
-                    jobLevelId: 9,
-                    posId: 29,
-                    engageForm: "劳务合同",
-                    tiptopDegree: "本科",
-                    specialty: "信息管理与信息系统",
-                    school: "深圳大学",
-                    beginDate: "2017-12-31",
-                    workState: "在职",
-                    workID: "00000001",
-                    contractTerm: 2.0,
-                    conversionTime: "2018-03-31",
-                    notWorkDate: null,
-                    beginContract: "2017-12-31",
-                    endContract: "2019-12-31",
+                    name: "",
+                    gender: "",
+                    birthday: "",
+                    idCard: "",
+                    wedlock: "",
+                    nationId: '',
+                    nativePlace: "",
+                    politicId: '',
+                    email: "",
+                    phone: "",
+                    address: "",
+                    departmentId: '',
+                    jobLevelId: '',
+                    posId: '',
+                    engageForm: "",
+                    tiptopDegree: "",
+                    specialty: "",
+                    school: "",
+                    beginDate: "",
+                    workState: "",
+                    workID: "",
+                    contractTerm: '',
+                    conversionTime: "",
+                    notWorkDate: '',
+                    beginContract: "",
+                    endContract: "",
                     workAge: null
                 },
             }
@@ -512,6 +563,64 @@
             this.initDictionaryData()
         },
         methods:{
+            onSuccess(reponse, file, fileList){
+                this.importData = '导入数据';
+                this.importIcon = 'el-icon-upload2';
+                this.isAbled = false;
+            },
+            //excel上传前执行
+            beforeUpload(){
+                this.importData = '正在上传';
+                this.importIcon = 'el-icon-loading';
+                this.isAbled = true;
+            },
+            exportData(){
+              window.open("/emp/basic/export");
+            },
+            deleteEmp(data){
+                this.$confirm('此操作将永久删除'+data.name+', 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    deleteRequest("/emp/basic/"+data.id).then(resp=>{
+                        if (resp){
+                            this.getEmpListByPage();
+                        }
+                    })
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+
+            },
+            addEmployee(){
+                this.$refs.ruleForm.validate((valid) => {
+                    if (valid){
+                        if (this.addEmployeeForm.id){
+                            putRequest('/emp/basic/', this.addEmployeeForm).then(resp=>{
+                                if (resp){
+                                    this.getEmpListByPage();
+                                    this.isShow = false;
+                                    this.initEmp();
+                                }
+                            })
+                        }else {
+                            postRequest("/emp/basic/", this.addEmployeeForm).then(resp=>{
+                                if (resp){
+                                    this.getEmpListByPage();
+                                    this.isShow = false;
+                                    this.initEmp();
+                                }
+                            })
+                        }
+                    }else {
+                        this.$mes服务器被吃了sage.error("请完善选项");
+                    }
+                })
+            },
             handleNodeClick(data){
                 this.tempTreeName = data.name;
                 this.addEmployeeForm.departmentId = data.id;
@@ -543,26 +652,58 @@
                 });
             },
             initDictionaryData(){
-              if (!window.sessionStorage.getItem("politicsStatus")){
+              // if (!window.sessionStorage.getItem("politicsStatus")){
                   getRequest("/emp/basic/politicsStatus").then(resp=>{
                       if (resp){
                           this.politicsStatus = resp.object;
                           window.sessionStorage.setItem("politicsStatus", resp.object);
                       }
                   });
-              }else {
-                  this.politicsStatus = window.sessionStorage.getItem("politicsStatus");
-              }
-              if (!window.sessionStorage.getItem("nations")) {
+              // }else {
+              //     this.politicsStatus = window.sessionStorage.getItem("politicsStatus");
+              // }
+              // if (!window.sessionStorage.getItem("nations")) {
                   getRequest("/emp/basic/nations").then(resp => {
                       if (resp) {
                           this.nations = resp.object;
                           window.sessionStorage.setItem("nations", resp.object);
                       }
                   });
-              }else {
-                  this.nations = window.sessionStorage.getItem("nations");
-              }
+              // }else {
+              //     this.nations = window.sessionStorage.getItem("nations");
+              // }
+            },
+            initEmp(){
+              this.addEmployeeForm = {
+                  name: "",
+                  gender: "",
+                  birthday: "",
+                  idCard: "",
+                  wedlock: "",
+                  nationId: '',
+                  nativePlace: "",
+                  politicId: '',
+                  email: "",
+                  phone: "",
+                  address: "",
+                  departmentId: '',
+                  jobLevelId: '',
+                  posId: '',
+                  engageForm: "",
+                  tiptopDegree: "",
+                  specialty: "",
+                  school: "",
+                  beginDate: "",
+                  workState: "",
+                  workID: "",
+                  contractTerm: '',
+                  conversionTime: "",
+                  notWorkDate: '',
+                  beginContract: "",
+                  endContract: "",
+                  workAge: null
+              },
+              this.tempTreeName = '';
             },
             getEmpListByPage(){
                 this.loading = true;
@@ -582,12 +723,21 @@
                 this.size = pageSize;
                 this.getEmpListByPage();
             },
-            showDialog(){
+            showEditDialog(data){
+                this.showTitle = '编辑员工信息';
+                this.addEmployeeForm = data;
+                this.tempTreeName = data.department.name;
                 this.initPositionsAndJobLevels();
+                this.isShow = true;
+            },
+            showDialog(){
                 this.getEmployeeWorkId();
+                this.showTitle = '新增员工';
+                this.initPositionsAndJobLevels();
                 this.isShow = true;
             },
             closeDialog(){
+                this.initEmp();
                 this.isShow = false;
             }
         }
