@@ -2,6 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Login from '../views/Login'
 import Home from '../views/Home'
+import friendChat from '../views/chat/friendChat'
 
 
 Vue.use(VueRouter)
@@ -17,7 +18,14 @@ Vue.use(VueRouter)
     path: '/Home',
     name: 'Home',
     component: Home,
-    hidden: true
+    hidden: true,
+    children: [
+      {
+        path: '/chat',
+        name: '在线聊天',
+        component: friendChat,
+      },
+    ]
   },
   // {
   //     path: '', //写不写都没有关系，这个制作菜单栏遍历

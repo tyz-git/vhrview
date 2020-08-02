@@ -4,17 +4,20 @@
             <!--页面顶部-->
             <el-header class="homeHeader">
                 <div class="title">微管理</div>
-                <!-- command指令指向的方法可以获取到被选中的下拉框的command属性值 -->
-                <el-dropdown class="userInfo" @command="command">
+                <div>
+                    <el-button @click="goChat" type="text" style="margin-right: 10px;color: black" icon="el-icon-bell"></el-button>
+                    <!-- command指令指向的方法可以获取到被选中的下拉框的command属性值 -->
+                    <el-dropdown class="userInfo" @command="command">
                     <span class="el-dropdown-link">
                     {{user.name}}<i><img :src="user.userface" alt=""></i>
                     </span>
-                    <el-dropdown-menu slot="dropdown">
-                        <el-dropdown-item command="personCenter">个人中心</el-dropdown-item>
-                        <el-dropdown-item command="setting">设置</el-dropdown-item>
-                        <el-dropdown-item divided command="logout">注销登录</el-dropdown-item>
-                    </el-dropdown-menu>
-                </el-dropdown>
+                        <el-dropdown-menu slot="dropdown">
+                            <el-dropdown-item command="personCenter">个人中心</el-dropdown-item>
+                            <el-dropdown-item command="setting">设置</el-dropdown-item>
+                            <el-dropdown-item divided command="logout">注销登录</el-dropdown-item>
+                        </el-dropdown-menu>
+                    </el-dropdown>
+                </div>
             </el-header>
             <el-container>
                 <!--菜单栏-->
@@ -64,6 +67,9 @@
           }
         },
         methods: {
+            goChat() {
+              this.$router.push("/chat");
+            },
             command(option) {
                 if (option == 'logout'){
                     this.$confirm('此操作将退出登录, 是否继续?', '提示', {
