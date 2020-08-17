@@ -13,6 +13,7 @@
                 :filter-node-method="filterNode"
                 :expand-on-click-node="false"
                 ref="tree">
+                
         <!--node:当前元素，data:当前元素中的数据(Json对象) -->
         <span class="custom-tree-node" slot-scope="{ node, data }" style="display: flex;justify-content:space-between;width: 100%;">
             <span>{{ data.name }}</span>  <!-- 和:props="defaultProps" 中的label属性是一个作用。 -->
